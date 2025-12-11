@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlay, FiInfo, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { getPosterUrl } from '../../utils/image';
 import { FaStar } from 'react-icons/fa';
+import { decodeHTMLEntities } from '../../utils/textFomat';
 
 
 interface HeroBannerProps {
@@ -76,10 +77,10 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ movies, loading }) => {
           {/* Title Section (Line clamp 3) */}
           <div>
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-xl uppercase line-clamp-3">
-              {movie.name}
+              {decodeHTMLEntities(movie.name)}
             </h2>
             <p className="text-lg md:text-xl text-amber-400 font-bold mt-2 tracking-wide line-clamp-1">
-              {movie.origin_name}
+              {decodeHTMLEntities(movie.origin_name)}
             </p>
           </div>
 

@@ -6,6 +6,7 @@ import {
     FiClock, FiTrash2, FiPlay, 
     FiCalendar, FiEyeOff, FiFilm, FiX 
 } from 'react-icons/fi';
+import { decodeHTMLEntities } from '../utils/textFomat';
 
 const HistoryPage: React.FC = () => {
     const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
@@ -112,7 +113,7 @@ const HistoryPage: React.FC = () => {
                                     {/* Tên phim */}
                                     <h3 className="text-sm md:text-base font-bold text-slate-800 line-clamp-1 mb-1 group-hover:text-amber-500 transition-colors" title={item.movieName}>
                                         <Link to={`/phim/${item.movieSlug}`}>
-                                            {item.movieName}
+                                            {decodeHTMLEntities(item.movieName)}
                                         </Link>
                                     </h3>
 

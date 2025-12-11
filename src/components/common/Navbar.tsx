@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiSearch, FiMenu, FiX, FiChevronDown, FiClock, FiGrid, FiHome, FiInfo, FiArrowRight } from 'react-icons/fi';
 import movieApi from '../../api/movieApi';
 import { getPosterUrl } from '../../utils/image';
+import { decodeHTMLEntities } from '../../utils/textFomat';
 
 // Định nghĩa lại Type để tránh lỗi TS nếu cần (giả sử MovieItem đã có global)
 // interface MovieItem { ... } 
@@ -274,10 +275,10 @@ const Navbar: React.FC = () => {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-sm font-bold text-slate-700 truncate group-hover/item:text-amber-600 transition-colors">
-                                                        {movie.name}
+                                                        {decodeHTMLEntities(movie.name)}
                                                     </h4>
                                                     <p className="text-xs text-slate-500 truncate mt-0.5">
-                                                        {movie.origin_name}
+                                                        {decodeHTMLEntities(movie.origin_name)}
                                                     </p>
                                                     <span className="text-[10px] text-slate-400 font-medium">
                                                         {movie.year} • {movie.time || 'N/A'}

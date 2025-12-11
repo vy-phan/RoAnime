@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlay, FiInfo, FiClock, FiStar } from 'react-icons/fi';
 import { getPosterUrl } from '../../utils/image';
 import { formatTime } from '../../utils/timeFomat';
+import { decodeHTMLEntities } from '../../utils/textFomat';
 
 interface MovieCardProps {
     movie: MovieItem;
@@ -68,9 +69,9 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
 
                 <div className="flex-1 min-w-0 pt-1">
                     <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-amber-400 transition-colors">
-                        <Link to={`/phim/${movie.slug}`}>{movie.name}</Link>
+                        <Link to={`/phim/${movie.slug}`}>{decodeHTMLEntities(movie.name)}</Link>
                     </h3>
-                    <p className="text-[11px] text-gray-400 line-clamp-1 mt-0.5">{movie.origin_name}</p>
+                    <p className="text-[11px] text-gray-400 line-clamp-1 mt-0.5">{decodeHTMLEntities(movie.origin_name)}</p>
                     <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-300 font-semibold">
                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                         <span>{movie.year}</span>
@@ -94,8 +95,8 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
 
                     <div className="p-4 flex flex-col gap-3 text-left bg-white">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800 line-clamp-1">{movie.name}</h3>
-                            <p className="text-xs text-slate-500 line-clamp-1">{movie.origin_name}</p>
+                            <h3 className="text-lg font-bold text-slate-800 line-clamp-1">{decodeHTMLEntities(movie.name)}</h3>
+                            <p className="text-xs text-slate-500 line-clamp-1">{decodeHTMLEntities(movie.origin_name)}</p>
                         </div>
 
                         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 p-2 rounded-lg">

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlay, FiInfo, FiClock, FiStar } from 'react-icons/fi';
 import { getPosterUrl } from '../../utils/image';
 import { formatTime } from '../../utils/timeFomat';
+import { decodeHTMLEntities } from '../../utils/textFomat';
 
 interface MovieCardProps {
     movie: MovieItem;
@@ -42,10 +43,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
                 {/* Thông tin tĩnh */}
                 <div className="px-1 space-y-1">
                     <h3 className="text-base font-bold text-slate-800 line-clamp-1 group-hover:text-sky-600 transition-colors">
-                        {movie.name}
+                        {decodeHTMLEntities(movie.name)}
                     </h3>
                     <div className="flex justify-between items-center">
-                        <p className="text-xs text-slate-500 line-clamp-1 max-w-[70%]">{movie.origin_name}</p>
+                        <p className="text-xs text-slate-500 line-clamp-1 max-w-[70%]">{decodeHTMLEntities(movie.origin_name)}</p>
                         <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
                             {movie.year}
                         </span>
@@ -87,10 +88,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
                         {/* Tiêu đề */}
                         <div className="space-y-1.5">
                             <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 leading-tight line-clamp-2">
-                                {movie.name}
+                                {decodeHTMLEntities(movie.name)}
                             </h3>
                             <p className="text-xs text-slate-500 font-medium line-clamp-1 tracking-wide">
-                                {movie.origin_name}
+                                {decodeHTMLEntities(movie.origin_name)}
                             </p>
                         </div>
 

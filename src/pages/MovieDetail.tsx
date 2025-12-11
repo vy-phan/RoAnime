@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import { addToHistory, getMovieHistory } from '../utils/history';
+import { decodeHTMLEntities } from '../utils/textFomat';
 
 
 const MovieDetail: React.FC = () => {
@@ -259,7 +260,7 @@ const MovieDetail: React.FC = () => {
 
                                 <div className="relative">
                                     <p className="text-slate-600 text-[15px] leading-7 text-justify font-normal">
-                                        {movie.content || "Nội dung đang được cập nhật..."}
+                                        {decodeHTMLEntities(movie.content) || "Nội dung đang được cập nhật..."}
                                     </p>
                                     {/* Decor trang trí */}
                                     <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-amber-100 rounded-tl-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
