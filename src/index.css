@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    /* 
+       Cú pháp: url('đường-dẫn'), fallback;
+       auto: là con trỏ mặc định nếu ảnh lỗi
+    */
+    cursor: url('/cursor.png'), auto;
+}
+
+/* Áp dụng khi hover vào link, nút bấm, hoặc thẻ có class cursor-pointer */
+a, button, input[type="submit"], [role="button"], .cursor-pointer {
+    /* 
+       Bạn có thể dùng ảnh khác (ví dụ bàn tay anime) cho trạng thái này.
+       Nếu muốn dùng chung 1 ảnh thì để giống hệt ở trên.
+       pointer: là fallback dạng bàn tay
+    */
+    cursor: url('/cursor.png'), pointer;
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
