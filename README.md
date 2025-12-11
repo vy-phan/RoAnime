@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# 🎬 Rổ Anime - Web Xem Phim Hoạt Hình Online
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Rổ Anime Banner](public/logoRoAnime.png)
 
-Currently, two official plugins are available:
+> **"Nơi thỏa mãn đam mê Anime với giao diện hiện đại và trải nghiệm mượt mà."**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📖 Giới Thiệu
 
-## React Compiler
+**Rổ Anime** là một dự án **Frontend thuần túy (Pure Frontend)** được xây dựng nhằm mục đích nghiên cứu và thực hành các công nghệ web hiện đại. Website tập trung tối ưu hóa giao diện người dùng (UI/UX), khả năng tương thích trên mọi thiết bị (Mobile-First) và tốc độ tải trang nhanh chóng.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dự án này là sản phẩm tâm huyết của **Arya Kujou**, dành cho cộng đồng yêu thích Anime.
 
-## Expanding the ESLint configuration
+## ✨ Tính Năng Nổi Bật
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+*   **Giao diện hiện đại:** Thiết kế đẹp mắt, thân thiện, tối ưu trải nghiệm người dùng.
+*   **Responsive Design:** Hiển thị mượt mà trên cả máy tính, máy tính bảng và điện thoại di động.
+*   **Xem phim mượt mà:** Tích hợp trình phát video ổn định, hỗ trợ nhiều server.
+*   **Lịch sử xem:** Tự động lưu lại tập phim đang xem dở (sử dụng LocalStorage).
+*   **Thông tin chi tiết:** Hiển thị đầy đủ thông tin, nội dung, trailer và hình ảnh của Anime.
+*   **Tìm kiếm & Lọc:** Dễ dàng tìm kiếm các bộ Anime yêu thích.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠 Công Nghệ Sử Dụng
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Dự án được xây dựng dựa trên các công nghệ và thư viện mới nhất:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+*   **Core:** [ReactJS](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+*   **Build Tool:** [Vite](https://vitejs.dev/) (Tốc độ build siêu nhanh)
+*   **Styling:** [Tailwind CSS v3](https://tailwindcss.com/)
+*   **Routing:** [React Router Dom v6](https://reactrouter.com/)
+*   **HTTP Client:** [Axios](https://axios-http.com/)
+*   **Icons:** [React Icons](https://react-icons.github.io/react-icons/) (Feather Icons)
+
+## 🔗 Nguồn Dữ Liệu (API)
+
+Dự án sử dụng nguồn tài nguyên API công khai và miễn phí được cung cấp bởi **KKPhim (PhimApi)**.
+Xin chân thành cảm ơn đội ngũ phát triển KKPhim đã chia sẻ kho dữ liệu phim khổng lồ giúp cộng đồng lập trình viên có cơ hội thực hành.
+
+*   **API Provider:** [KKPhim (PhimApi)](https://phimapi.com/)
+
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Local
+
+Để chạy dự án này trên máy cá nhân của bạn, hãy làm theo các bước sau:
+
+### 1. Clone dự án
+```bash
+git clone https://github.com/vy-phan/RoAnime.git
+cd watchAnime
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Cài đặt các gói phụ thuộc (Dependencies)
+```bash
+npm install
+# Hoặc nếu dùng yarn
+yarn install
+# Hoặc nếu dùng bun 
+bun install
 ```
+
+### 3. Chạy môi trường phát triển (Development)
+```bash
+npm run dev
+# Hoặc
+yarn dev
+# Hoặc
+bun dev
+```
+Truy cập vào đường dẫn `http://localhost:5174` để xem kết quả.
+
+### 4. Build cho môi trường Production
+```bash
+npm run build
+```
+
+## 📂 Cấu Trúc Thư Mục
+
+```
+src/
+├── api/            # Cấu hình Axios và các hàm gọi API
+├── assets/         # Hình ảnh, font chữ, static files
+├── components/     # Các component tái sử dụng (Header, Footer, Cards...)
+├── pages/          # Các trang chính (Home, MovieDetail, Watch, History...)
+├── utils/          # Các hàm tiện ích (Format time, LocalStorage...)
+├── App.tsx         # Component gốc và cấu hình Router
+└── main.tsx        # Entry point của ứng dụng
+```
+
+## 👤 Tác Giả
+
+Developed with ❤️ by **Arya Kujou**
+
+---
+*Lưu ý: Dự án này được xây dựng với mục đích phi lợi nhuận và học tập.*
