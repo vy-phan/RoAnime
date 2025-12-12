@@ -11,9 +11,8 @@ import GenreTags from '../components/home/GenreTags';
 // Hàm tạo Cache Key cho Home Grid
 const getCacheKey = (page: number) => `home_anime_japan_page_${page}`;
 const CACHE_EXPIRY_MS = 1000 * 60 * 10; // 10 phút
-
-// Hàm tạo Cache Key cho Ranking (Chỉ cần cache theo năm)
 const RANKING_CACHE_KEY = `ranking_anime_japan_${new Date().getFullYear()}`;
+const TRENDING_CACHE_KEY = 'home_trending_anime';
 
 const Home: React.FC = () => {
     // State cho Main Grid
@@ -134,11 +133,34 @@ const Home: React.FC = () => {
     useEffect(() => {
         const fetchTrending = async () => {
             setTrendingLoading(true);
+
+            // BƯỚC 1: Kiểm tra Cache
+            const cachedData = localStorage.getItem(TRENDING_CACHE_KEY);
+            const now = Date.now();
+
+            if (cachedData) {
+                try {
+                    const parsedCache = JSON.parse(cachedData);
+                    if (now - parsedCache.timestamp < CACHE_EXPIRY_MS) {
+                        setTrendingMovies(parsedCache.data);
+                        setTrendingLoading(false);
+                        return; // Dừng hàm, không gọi API nữa
+                    }
+                } catch (e) {
+                    localStorage.removeItem(TRENDING_CACHE_KEY);
+                }
+            }
+
             try {
-                // Gọi API mới vừa tạo
                 const response = await movieApi.getTrendingAnimeMovies(1, 6);
-                if (response.status === 'success' || response.data) {
+
+                if (response.data && response.data.items) {
                     setTrendingMovies(response.data.items);
+                    const dataToStore = {
+                        data: response.data.items,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(TRENDING_CACHE_KEY, JSON.stringify(dataToStore));
                 }
             } catch (error) {
                 console.error("Lỗi tải Top Trending:", error);

@@ -32,6 +32,8 @@ const MovieDetail: React.FC = () => {
     const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([]);
     const [lastWatchedEpisode, setLastWatchedEpisode] = useState<any>(null);
 
+    const [currentServerIndex, setCurrentServerIndex] = useState<number>(0);
+
     useEffect(() => {
         const fetchMovieDetail = async () => {
             if (!slug) return;
@@ -84,27 +86,15 @@ const MovieDetail: React.FC = () => {
         });
     };
 
+    const handleCopyLink = () => {
+        // Copy link hiện tại vào bộ nhớ tạm
+        navigator.clipboard.writeText(window.location.href);
 
-    const handleShare = async () => {
-        const currentUrl = window.location.href;
-        const shareData = {
-            title: movie?.name || 'Xem phim hay',
-            text: `Cày phim ${movie?.name} ngay tại đây:`,
-            url: currentUrl,
-        };
+        // Hiển thị trạng thái "Đã copy"
+        setIsCopied(true);
 
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                // Fallback: Copy clipboard (PC Chrome/Win)
-                await navigator.clipboard.writeText(currentUrl);
-                setIsCopied(true);
-                setTimeout(() => setIsCopied(false), 2000);
-            }
-        } catch (error) {
-            console.error('Lỗi share:', error);
-        }
+        // Sau 2 giây tự động quay lại trạng thái cũ
+        setTimeout(() => setIsCopied(false), 2000);
     };
 
 
@@ -112,7 +102,10 @@ const MovieDetail: React.FC = () => {
     if (loading) return <Loading message="Đang tải thông tin phim..." className="h-screen" />;
     if (!movie) return <div className="text-center py-20 text-slate-600">Không tìm thấy phim.</div>;
 
-    const serverData = movie.episodes?.[0]?.server_data || [];
+    const availableServers = movie.episodes || [];
+    const currentServer = availableServers[currentServerIndex];
+    const serverData = currentServer?.server_data || [];
+
     const youtubeId = getYoutubeId(movie.trailer_url);
 
     // Nếu có lịch sử (lastWatchedEpisode) thì dùng nó, nếu không thì dùng tập đầu tiên (serverData[0])
@@ -205,7 +198,7 @@ const MovieDetail: React.FC = () => {
 
                             {/* Nút Share Mới */}
                             <button
-                                onClick={handleShare}
+                                onClick={handleCopyLink}
                                 className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold border-2 transition-all hover:scale-105 active:scale-95 ${isCopied
                                     ? 'bg-green-50 border-green-500 text-green-600'
                                     : 'bg-white border-slate-200 text-slate-600 hover:border-amber-400 hover:text-amber-500 hover:shadow-md'
@@ -357,18 +350,56 @@ const MovieDetail: React.FC = () => {
                             <div className="p-6 min-h-[400px]">
 
                                 {/* 1. EPISODES */}
+                                {/* 1. EPISODES */}
                                 {activeTab === 'episodes' && (
                                     <div className="animate-in fade-in zoom-in-95 duration-300">
+
+                                        {/* --- PHẦN MỚI: DANH SÁCH SERVER (VIETSUB / LỒNG TIẾNG) --- */}
+                                        {availableServers.length > 0 && (
+                                            <div className="mb-6">
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                                                    <FiLayers /> Chọn Server / Ngôn ngữ
+                                                </p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {availableServers.map((server, index) => {
+                                                        // Xử lý tên server cho đẹp (bỏ chữ #Hà Nội nếu muốn)
+                                                        // API trả về: "#Hà Nội (Vietsub)" -> Hiển thị: "Vietsub"
+                                                        const serverName = server.server_name.replace('#Hà Nội', '').trim().replace(/[()]/g, '') || server.server_name;
+
+                                                        const isActive = currentServerIndex === index;
+
+                                                        return (
+                                                            <button
+                                                                key={index}
+                                                                onClick={() => setCurrentServerIndex(index)}
+                                                                className={`
+                                    px-4 py-2 rounded-lg text-sm font-bold transition-all border
+                                    ${isActive
+                                                                        ? 'bg-amber-400 border-amber-400 text-white shadow-lg shadow-amber-400/30 transform scale-105'
+                                                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-amber-300'
+                                                                    }
+                                `}
+                                                            >
+                                                                {serverName}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {/* --------------------------------------------------------- */}
+
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
                                                 <h3 className="font-bold text-slate-800">
-                                                    {movie.episodes?.[0]?.server_name || "Danh Sách Tập"}
+                                                    {/* Hiển thị tên server đang chọn */}
+                                                    {currentServer?.server_name || "Danh Sách Tập"}
                                                 </h3>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                {/* Nút Sắp Xếp */}
+                                                {/* Nút Sắp Xếp (Giữ nguyên) */}
                                                 <button
                                                     onClick={() => setSortDesc(!sortDesc)}
                                                     className="flex items-center gap-1 text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-amber-400 hover:text-amber-500 px-3 py-1 rounded-lg transition-all shadow-sm active:scale-95"
@@ -391,6 +422,7 @@ const MovieDetail: React.FC = () => {
                                             </div>
                                         </div>
 
+                                        {/* Render danh sách tập phim (Dựa trên serverData đã tính toán ở trên) */}
                                         {serverData.length > 0 ? (
                                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
                                                 {[...serverData]
@@ -399,23 +431,23 @@ const MovieDetail: React.FC = () => {
                                                         return sortDesc ? getNum(b.name) - getNum(a.name) : getNum(a.name) - getNum(b.name);
                                                     })
                                                     .map((ep, index) => {
-                                                        // NEW: Kiểm tra xem tập này đã xem chưa
                                                         const isWatched = watchedEpisodes.includes(ep.slug);
 
                                                         return (
                                                             <Link
                                                                 key={index}
-                                                                to={`/phim/${movie.slug}/${ep.slug}`}
+                                                                to={`/phim/${movie.slug}/${ep.slug}?sv=${currentServerIndex}`}
                                                                 onClick={() => handleWatchMovie(ep)}
                                                                 className="group block"
                                                             >
                                                                 <div className={`
-                                                                    border rounded-lg py-2 px-1 text-center transition-all duration-200 shadow-sm
-                                                                    ${isWatched
-                                                                       ? 'bg-slate-200 text-slate-400 border-slate-200 shadow-inner'
-                                                                        : 'bg-gray-50 text-slate-600 border-slate-200 hover:bg-amber-400 hover:text-white hover:border-amber-400 hover:shadow-md' // Style mặc định
+                                                                            border rounded-lg py-2 px-1 text-center transition-all duration-200 shadow-sm
+                                                                            ${isWatched
+                                                                        ? 'bg-slate-200 text-slate-400 border-slate-200 shadow-inner'
+                                                                        : 'bg-gray-50 text-slate-600 border-slate-200 hover:bg-amber-400 hover:text-white hover:border-amber-400 hover:shadow-md'
                                                                     }
-                                                                `}>
+                                                                            ${/* Highlight tập đang chọn nếu cần */ ''}
+                                                                        `}>
                                                                     <span className="text-xs font-bold truncate block">
                                                                         {ep.name}
                                                                     </span>
@@ -427,7 +459,7 @@ const MovieDetail: React.FC = () => {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center h-64 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                                                 <FiLayers className="text-4xl mb-2 opacity-30" />
-                                                <p>Chưa có tập phim nào.</p>
+                                                <p>Chưa có tập phim nào cho server này.</p>
                                             </div>
                                         )}
                                     </div>
@@ -489,7 +521,7 @@ const MovieDetail: React.FC = () => {
 
                     {/* Nút Share Mobile */}
                     <button
-                        onClick={handleShare}
+                        onClick={handleCopyLink}
                         className="w-12 flex items-center justify-center bg-slate-100 text-slate-600 rounded-xl border border-slate-200 active:scale-90 active:bg-slate-200 transition-all"
                     >
                         {isCopied ? <FiCheck className="text-xl text-green-600" /> : <FiShare2 className="text-xl" />}

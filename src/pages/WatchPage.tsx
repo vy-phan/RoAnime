@@ -1,16 +1,20 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import movieApi from '../api/movieApi';
 import Loading from '../components/common/Loading';
 import {
     FiChevronRight, FiAlertCircle, FiChevronLeft, FiHome,
-    FiShare2, FiFastForward, FiMonitor, FiArrowUp, FiArrowDown
+    FiShare2, FiFastForward, FiMonitor, FiArrowUp, FiArrowDown,
+    FiLayers,
+    FiCheck
 } from 'react-icons/fi'; // Thêm icon Arrow cho sort
 import { decodeHTMLEntities } from '../utils/textFomat';
+import { addToHistory, getMovieHistory } from '../utils/history';
 
 const WatchPage: React.FC = () => {
     const { slug, episodeSlug } = useParams<{ slug: string; episodeSlug: string }>();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [movie, setMovie] = useState<any | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -20,7 +24,18 @@ const WatchPage: React.FC = () => {
     const [isCinemaMode, setIsCinemaMode] = useState(false);
     const [autoNext, setAutoNext] = useState(true);
     const [isReversed, setIsReversed] = useState(false); // State sắp xếp tập phim
+    const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([]);
+    const [isCopied, setIsCopied] = useState(false);
+    const handleCopyLink = () => {
+        // Copy link hiện tại vào bộ nhớ tạm
+        navigator.clipboard.writeText(window.location.href);
 
+        // Hiển thị trạng thái "Đã copy"
+        setIsCopied(true);
+
+        // Sau 2 giây tự động quay lại trạng thái cũ
+        setTimeout(() => setIsCopied(false), 2000);
+    };
     // 1. Fetch dữ liệu
     useEffect(() => {
         const fetchData = async () => {
@@ -48,46 +63,85 @@ const WatchPage: React.FC = () => {
     }, [slug]);
 
     // 2. Logic tìm tập phim hiện tại & danh sách tập hiển thị
-    const { currentEpisode, episodeListDisplay } = useMemo(() => {
-        if (!movie || !episodeSlug) return { currentEpisode: null, episodeListDisplay: [] };
+    const { currentEpisode, episodeListDisplay, currentServer, serverList } = useMemo(() => {
+        if (!movie || !episodeSlug) return {
+            currentEpisode: null,
+            episodeListDisplay: [],
+            currentServer: null,
+            serverList: []
+        };
 
-        const server = movie.episodes[0]; // Mặc định server đầu tiên
-        if (!server) return { currentEpisode: null, episodeListDisplay: [] };
+        const serverList = movie.episodes || [];
 
-        // Tìm tập hiện tại
+        // Lấy index từ URL (?sv=1), nếu không có thì mặc định là 0
+        const serverIndexParam = parseInt(searchParams.get('sv') || '0');
+
+        // Đảm bảo index hợp lệ, nếu sai quay về 0
+        const activeServerIndex = (serverIndexParam >= 0 && serverIndexParam < serverList.length)
+            ? serverIndexParam
+            : 0;
+
+        const server = serverList[activeServerIndex];
+
+        if (!server) return { currentEpisode: null, episodeListDisplay: [], currentServer: null, serverList: [] };
+
+        // Tìm tập hiện tại trong server ĐANG CHỌN
         const episodeIndex = server.server_data.findIndex((ep: any) => ep.slug === episodeSlug);
-        const episode = server.server_data[episodeIndex];
+
+        // Nếu không tìm thấy tập phim trong server này (trường hợp đổi server mà server mới không có tập đó)
+        // -> Fallback về tập đầu tiên hoặc xử lý redirect (ở đây ta chọn tập đầu tiên tạm thời)
+        const safeEpisodeIndex = episodeIndex !== -1 ? episodeIndex : 0;
+        const episode = server.server_data[safeEpisodeIndex];
 
         const currentEpData = episode ? {
             episode,
             serverName: server.server_name,
-            // Logic tìm next/prev dựa trên index gốc
-            nextEpisode: server.server_data[episodeIndex + 1],
-            prevEpisode: server.server_data[episodeIndex - 1]
+            nextEpisode: server.server_data[safeEpisodeIndex + 1],
+            prevEpisode: server.server_data[safeEpisodeIndex - 1]
         } : null;
 
-        // Logic sắp xếp danh sách tập hiển thị (Copy mảng để không mutate gốc)
         const listToDisplay = [...server.server_data];
-        if (isReversed) {
-            listToDisplay.reverse();
-        }
+        if (isReversed) listToDisplay.reverse();
 
         return {
             currentEpisode: currentEpData,
-            episodeListDisplay: listToDisplay
+            episodeListDisplay: listToDisplay,
+            currentServer: server,
+            serverList: serverList // Trả về danh sách server để render nút chọn
         };
-    }, [movie, episodeSlug, isReversed]);
+    }, [movie, episodeSlug, isReversed, searchParams]);
 
     // Scroll top khi chuyển tập
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [episodeSlug]);
 
+    const handleChangeServer = (index: number) => {
+        setSearchParams({ sv: index.toString() });
+    };
+
+    useEffect(() => {
+        if (movie && currentEpisode?.episode) {
+            addToHistory(movie, currentEpisode.episode);
+            console.log("Đã lưu lịch sử:", movie.name, currentEpisode.episode.name);
+        }
+    }, [movie, currentEpisode]);
+
     // Logic khóa scroll body khi bật Cinema Mode
     useEffect(() => {
         document.body.style.overflow = isCinemaMode ? 'hidden' : 'auto';
         return () => { document.body.style.overflow = 'auto'; };
     }, [isCinemaMode]);
+
+    useEffect(() => {
+        if (slug) {
+            const history = getMovieHistory(slug);
+            if (history && history.watchedEpisodes) {
+                setWatchedEpisodes(history.watchedEpisodes);
+            }
+        }
+    }, [slug]);
+
 
     if (loading) return <Loading message="Đang tải video..." className="h-screen bg-white" />;
 
@@ -140,6 +194,7 @@ const WatchPage: React.FC = () => {
                     {currentEpisode ? (
                         <iframe
                             src={currentEpisode.episode.link_embed}
+                            key={currentEpisode.episode.link_embed}
                             title={currentEpisode.episode.name}
                             className={`w-full h-full ${isCinemaMode ? 'max-h-screen' : ''}`}
                             allowFullScreen
@@ -177,7 +232,7 @@ const WatchPage: React.FC = () => {
                     {/* Left Buttons: Pointer-events-auto để click được */}
                     <div className={`flex items-center gap-4 w-full xl:w-auto transition-opacity pointer-events-auto ${isCinemaMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
                         <button
-                            onClick={() => currentEpisode?.prevEpisode && navigate(`/phim/${slug}/${currentEpisode.prevEpisode.slug}`)}
+                            onClick={() => currentEpisode?.prevEpisode && navigate(`/phim/${slug}/${currentEpisode.prevEpisode.slug}?${searchParams.toString()}`)}
                             disabled={!currentEpisode?.prevEpisode}
                             className={`
                         flex-1 xl:flex-none h-10 px-6 rounded-full font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2
@@ -189,7 +244,7 @@ const WatchPage: React.FC = () => {
                             <FiChevronLeft /> Tập trước
                         </button>
                         <button
-                            onClick={() => currentEpisode?.nextEpisode && navigate(`/phim/${slug}/${currentEpisode.nextEpisode.slug}`)}
+                            onClick={() => currentEpisode?.nextEpisode && navigate(`/phim/${slug}/${currentEpisode.nextEpisode.slug}?${searchParams.toString()}`)}
                             disabled={!currentEpisode?.nextEpisode}
                             className={`
                         flex-1 xl:flex-none h-10 px-6 rounded-full font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2
@@ -232,9 +287,13 @@ const WatchPage: React.FC = () => {
                             </span>
                         </button>
 
-                        <button className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-full transition-all ${isCinemaMode ? 'text-gray-400 opacity-20 hover:opacity-100 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'}`}>
-                            <FiShare2 className="text-lg" />
-                            <span>Chia sẻ</span>
+                        <button
+                            onClick={handleCopyLink}
+                            className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-full transition-all ${isCinemaMode ? 'text-gray-400 opacity-20 hover:opacity-100 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'}`}>
+                            {isCopied ? <FiCheck className="text-lg text-green-500" /> : <FiShare2 className="text-lg" />}
+                            <span className={isCopied ? "text-green-500 font-bold" : ""}>
+                                {isCopied ? "Đã copy link" : "Chia sẻ"}
+                            </span>
                         </button>
 
                     </div>
@@ -287,19 +346,47 @@ const WatchPage: React.FC = () => {
 
                         {/* --- LIST EPISODES (Có Sort) --- */}
                         <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
-                            <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-                                {/* Server Name + Sort Button */}
+                            {serverList.length > 1 && (
+                                <div className="mb-6 pb-4 border-b border-gray-100">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                                        <FiLayers /> Chọn Server / Ngôn ngữ
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {serverList.map((srv: any, idx: number) => {
+                                            const currentSvIndex = parseInt(searchParams.get('sv') || '0');
+                                            const isActive = currentSvIndex === idx;
+                                            const serverName = srv.server_name.replace('#Hà Nội', '').trim().replace(/[()]/g, '') || srv.server_name;
+
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleChangeServer(idx)}
+                                                    className={`
+                                                        px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all border flex items-center gap-2
+                                                        ${isActive
+                                                            ? 'bg-amber-400 border-amber-400 text-white shadow-md'
+                                                            : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-white hover:border-amber-400 hover:text-amber-500'}
+                                                    `}
+                                                >
+                                                    {serverName}
+                                                    {isActive && <FiCheck />}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-4">
                                     <h3 className="text-base sm:text-lg font-bold text-gray-800 uppercase flex items-center gap-2">
                                         <span className="w-1 h-5 bg-amber-400 rounded-full inline-block"></span>
                                         Danh sách tập
                                     </h3>
-                                    <span className="text-[10px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded font-medium border border-gray-200">
-                                        {currentEpisode?.serverName}
+                                    <span className="text-[10px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded font-medium border border-gray-200 truncate max-w-[100px] sm:max-w-none">
+                                        {currentServer?.server_name || "Server mặc định"}
                                     </span>
                                 </div>
 
-                                {/* Button Sort */}
                                 <button
                                     onClick={() => setIsReversed(!isReversed)}
                                     className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-amber-600 transition-colors bg-gray-50 hover:bg-amber-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-amber-200"
@@ -309,19 +396,27 @@ const WatchPage: React.FC = () => {
                                 </button>
                             </div>
 
+                            {/* Episodes Grid */}
                             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                                 {episodeListDisplay.map((ep: any) => {
-                                    const isActive = ep.slug === episodeSlug;
+                                    const isActive = ep.slug === episodeSlug; // Tập đang xem
+                                    const isWatched = watchedEpisodes.includes(ep.slug); // Tập đã xem
+
                                     return (
                                         <Link
                                             key={ep.slug}
-                                            to={`/phim/${slug}/${ep.slug}`}
+                                            to={`/phim/${slug}/${ep.slug}?${searchParams.toString()}`}
                                             className={`
-                                        py-2 px-1 text-center rounded-lg text-[11px] sm:text-xs font-bold transition-all border
-                                        ${isActive
-                                                    ? 'bg-amber-400 text-white border-amber-400 shadow-md shadow-amber-200'
-                                                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-white hover:border-amber-400 hover:text-amber-600'}
-                                    `}
+                                                py-2 px-1 text-center rounded-lg text-[11px] sm:text-xs font-bold transition-all border
+                                                ${isActive
+                                                    ? 'bg-amber-400 text-white border-amber-400 shadow-md shadow-amber-200' // Đang xem: Màu vàng nổi bật
+                                                    : isWatched
+                                                        ? 'bg-gray-200 text-gray-400 border-gray-200 shadow-inner' // Đã xem: Màu xám chìm
+                                                        : isCinemaMode
+                                                            ? 'bg-[#2a2a2a] text-gray-400 border-[#333] hover:bg-[#444] hover:text-white' // Chưa xem (Rạp phim)
+                                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-white hover:border-amber-400 hover:text-amber-600' // Chưa xem (Thường)
+                                                }
+                `}
                                         >
                                             {ep.name.replace('Tập ', '')}
                                         </Link>
