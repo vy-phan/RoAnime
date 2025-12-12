@@ -35,7 +35,7 @@ const movieApi = {
                 country: 'nhat-ban',
                 page: pageNumber,
                 year: currentYear,
-                sort_field: 'modified.time',
+                sort_field: 'year',
                 sort_type: 'desc',
                 limit: limit
             }
@@ -47,7 +47,7 @@ const movieApi = {
             params: {
                 country: 'nhat-ban',
                 page: pageNumber,
-                sort_field: 'modified.time',
+                sort_field: 'year',
                 sort_type: 'desc',
                 limit: limit
             }
