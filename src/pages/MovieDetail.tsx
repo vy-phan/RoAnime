@@ -173,13 +173,16 @@ const MovieDetail: React.FC = () => {
                             </span>
 
                             {/* Tập phim */}
-                            <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm border ${movie.episode_current?.includes("Hoàn Tất")
+                            <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm border ${movie.episode_current?.includes("Hoàn Tất") || movie.episode_current?.includes("Full")
                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
                                 : 'bg-sky-50 text-sky-600 border-sky-200'
                                 }`}>
-                                {movie.episode_current?.includes("Hoàn Tất")
-                                    ? movie.episode_current
-                                    : `Tập ${movie.episode_current || 0} / ${movie.episode_total || '?'}`}
+                                {movie.episode_current?.includes("Full") ? movie.episode_current : (
+                                    movie.episode_current?.includes("Hoàn Tất")
+                                        ? movie.episode_current
+                                        : `${movie.episode_current || 0} / ${movie.episode_total || '?'}`
+                                )
+                                }
                             </span>
 
                         </div>

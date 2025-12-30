@@ -67,6 +67,29 @@ const Navbar: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            // Thêm class này hoặc set style trực tiếp để khóa cuộn trang chính
+            document.body.style.overflow = 'hidden';
+            
+            // (Tùy chọn) Nếu trên iOS Safari vẫn bị cuộn, bạn có thể cần thêm:
+            // document.body.style.position = 'fixed';
+            // document.body.style.width = '100%';
+        } else {
+            document.body.style.overflow = 'unset';
+            
+            // (Tùy chọn) Reset lại fix cho iOS
+            // document.body.style.position = '';
+            // document.body.style.width = '';
+        }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+            // document.body.style.position = '';
+            // document.body.style.width = '';
+        };
+    }, [isMobileMenuOpen]);
+
     // Click outside để đóng dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -182,7 +205,7 @@ const Navbar: React.FC = () => {
                         </div>
                     </div>
                     
-                    <NavLink to="/chieu-rap" icon={<FiInfo />} label="Phim chiếu rạp" active={location.pathname === '/phim-chieu-rap'} />
+                    <NavLink to="/chieu-rap" icon={<FiInfo />} label="Phim chiếu rạp" active={location.pathname === '/chieu-rap'} />
                     <NavLink to="/lich-su" icon={<FiClock />} label="Lịch sử" active={location.pathname === '/lich-su'} />
                     <NavLink to="/gioi-thieu" icon={<FiInfo />} label="Giới thiệu" active={location.pathname === '/gioi-thieu'} />
                 </nav>
@@ -322,7 +345,7 @@ const Navbar: React.FC = () => {
                 lg:hidden fixed inset-0 z-40 bg-white/95 backdrop-blur-xl transition-all duration-300
                 ${isMobileMenuOpen ? 'opacity-100 visible top-16' : 'opacity-0 invisible top-20 pointer-events-none'}
             `}>
-                <div className="container mx-auto px-4 py-6 flex flex-col h-full overflow-y-auto pb-20">
+                <div className="container mx-auto px-4 py-6 flex flex-col h-full overflow-y-auto pb-20 overscroll-contain">
                     <form onSubmit={handleSearch} className="relative mb-6">
                         <input
                             type="text"
@@ -353,7 +376,7 @@ const Navbar: React.FC = () => {
                                 ))}
                             </div>
                         </div>
-                        <MobileNavLink to="/phim-chieu-rap" label="Phim chiếu rạp" icon={<FiInfo />} onClick={() => setIsMobileMenuOpen(false)} />
+                        <MobileNavLink to="/chieu-rap" label="Phim chiếu rạp" icon={<FiInfo />} onClick={() => setIsMobileMenuOpen(false)} />
                         <MobileNavLink to="/lich-su" label="Lịch sử xem" icon={<FiClock />} onClick={() => setIsMobileMenuOpen(false)} />
                         <MobileNavLink to="/gioi-thieu" label="Giới thiệu" icon={<FiInfo />} onClick={() => setIsMobileMenuOpen(false)} />
                     </div>

@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import movieApi from '../api/movieApi';
 import MovieCard from '../components/common/MovieCard';
 import Loading from '../components/common/Loading';
-import { FiFilm, FiChevronLeft, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
+import Pagination from '../components/common/Pagination'; // <--- IMPORT COMPONENT MỚI
+import { FiFilm, FiAlertCircle } from 'react-icons/fi';
 
 const TheatricalPage: React.FC = () => {
-    // 1. Quản lý Params trên URL (để khi F5 vẫn ở đúng trang)
+    // 1. Quản lý Params
     const [searchParams, setSearchParams] = useSearchParams();
     const currentPage = Number(searchParams.get('page')) || 1;
 
@@ -25,7 +26,6 @@ const TheatricalPage: React.FC = () => {
         const fetchMovies = async () => {
             setLoading(true);
             try {
-                // Gọi hàm API mới tạo
                 const response = await movieApi.getTheatricalMovies(currentPage, 24);
                 
                 if (response.status === 'success' || response.data) {
@@ -39,7 +39,6 @@ const TheatricalPage: React.FC = () => {
                 setMovies([]);
             } finally {
                 setLoading(false);
-                // Scroll lên đầu trang khi chuyển trang
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
@@ -47,11 +46,9 @@ const TheatricalPage: React.FC = () => {
         fetchMovies();
     }, [currentPage]);
 
-    // 4. Xử lý chuyển trang
+    // 4. Xử lý chuyển trang (Rất gọn, chỉ cần set URL)
     const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= pagination.totalPages) {
-            setSearchParams({ page: newPage.toString() });
-        }
+        setSearchParams({ page: newPage.toString() });
     };
 
     if (loading) return <Loading message="Đang tải phim chiếu rạp..." />;
@@ -96,33 +93,12 @@ const TheatricalPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* --- PAGINATION (PHÂN TRANG) --- */}
-                {pagination.totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-3 mt-12">
-                        {/* Nút Trước */}
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:border-rose-400 hover:text-rose-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                        >
-                            <FiChevronLeft /> Trước
-                        </button>
-
-                        {/* Số trang hiện tại */}
-                        <div className="px-6 py-2.5 bg-rose-50 text-rose-600 font-black rounded-xl border border-rose-100 shadow-sm text-sm">
-                            Trang {currentPage} / {pagination.totalPages}
-                        </div>
-
-                        {/* Nút Sau */}
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === pagination.totalPages}
-                            className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:border-rose-400 hover:text-rose-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                        >
-                            Sau <FiChevronRight />
-                        </button>
-                    </div>
-                )}
+                {/* --- SỬ DỤNG PAGINATION COMPONENT --- */}
+                <Pagination 
+                    currentPage={currentPage}
+                    totalPages={pagination.totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );

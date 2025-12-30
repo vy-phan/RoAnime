@@ -3,10 +3,11 @@ import movieApi from '../api/movieApi';
 import Loading from '../components/common/Loading';
 import MovieCard from '../components/common/MovieCard';
 import RankingBoard from '../components/home/RankingBoard'; // Đảm bảo đường dẫn đúng
-import { FiChevronLeft, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
+import { FiRefreshCw, FiX } from 'react-icons/fi';
 import HeroBanner from '../components/home/HeroBanner';
 import TopTrendingSection from '../components/home/TopTrendingSection';
 import GenreTags from '../components/home/GenreTags';
+import Pagination from '../components/common/Pagination';
 
 // Hàm tạo Cache Key cho Home Grid
 const getCacheKey = (page: number) => `home_anime_japan_page_${page}`;
@@ -21,7 +22,8 @@ const Home: React.FC = () => {
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
-    const [pageInput, setPageInput] = useState<string>('1');
+    const [, setPageInput] = useState<string>('1');
+    const [showBanner, setShowBanner] = useState(true);
 
     const [rankingMovies, setRankingMovies] = useState<MovieItem[]>([]);
     const [rankingLoading, setRankingLoading] = useState<boolean>(true);
@@ -182,30 +184,6 @@ const Home: React.FC = () => {
         fetchMovies(currentPage, true);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (val === '' || /^\d+$/.test(val)) setPageInput(val);
-    };
-
-    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            let pageNumber = parseInt(pageInput);
-            if (isNaN(pageNumber)) {
-                setPageInput(currentPage.toString());
-                return;
-            }
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            setCurrentPage(pageNumber);
-            setPageInput(pageNumber.toString());
-            (e.target as HTMLInputElement).blur();
-        }
-    };
-
-    const handleInputBlur = () => {
-        setPageInput(currentPage.toString());
-    };
-
     // Render chính
     return (
         <div className="container mx-auto px-4 pb-10 pt-6">
@@ -258,27 +236,49 @@ const Home: React.FC = () => {
 
                     {/* Pagination UI */}
                     {!loading && movies.length > 0 && (
-                        <div className="flex justify-center w-full mt-4">
-                            <div className="flex items-center gap-2 p-1.5 bg-white/80 backdrop-blur-xl border border-white/50 rounded-full shadow-lg shadow-sky-500/5 ring-1 ring-slate-100">
-                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm active:scale-95">
-                                    <FiChevronLeft size={20} />
-                                </button>
-                                <div className="flex items-center gap-2 px-4">
-                                    <span className="text-slate-500 font-bold text-sm hidden sm:inline">Trang</span>
-                                    <input type="text" inputMode="numeric" value={pageInput} onChange={handleInputChange} onKeyDown={handleInputKeyDown} onBlur={handleInputBlur} className="w-14 text-center bg-slate-50 text-slate-700 font-extrabold text-lg rounded-xl py-1.5 border border-slate-200 focus:bg-white focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100 transition-all shadow-inner" />
-                                    <span className="text-slate-400 font-semibold text-sm">/ {totalPages}</span>
-                                </div>
-                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm active:scale-95">
-                                    <FiChevronRight size={20} />
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     )}
                 </div>
 
-                {/* === RIGHT SIDEBAR (3 Phần) - BẢNG XẾP HẠNG === */}
-                <div className="lg:col-span-3">
-                    <RankingBoard movies={rankingMovies} loading={rankingLoading} />
+                {/* === RIGHT SIDEBAR (3 Phần) - BẢNG XẾP HẠNG & QUẢNG CÁO === */}
+                <div className="lg:col-span-3 flex flex-col gap-8">
+
+                    {/* 1. Ranking Board */}
+                    <div className="w-full h-fit relative">
+                        <RankingBoard movies={rankingMovies} loading={rankingLoading} />
+                    </div>
+
+                    {/* 2. Banner GIF Quảng cáo (Chỉ hiển thị khi showBanner === true) */}
+                    {showBanner && (
+                        <div className="w-[85%] mx-auto aspect-square relative rounded-3xl overflow-hidden shadow-xl shadow-slate-200 border border-slate-100 group cursor-pointer transition-all duration-300 hover:shadow-2xl z-10 bg-white animate-fade-in">
+
+                            <img
+                                src="/chitoge.gif"
+                                alt="Promotion Banner"
+                                className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                            />
+
+                            {/* Lớp phủ hiệu ứng khi hover */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+
+                            {/* NÚT X (CLOSE BUTTON) */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Ngăn sự kiện click lan ra thẻ cha (nếu banner có link)
+                                    setShowBanner(false);
+                                }}
+                                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black/30 hover:bg-rose-500 backdrop-blur-md text-white rounded-full transition-all duration-200 hover:rotate-90 shadow-sm border border-white/20 z-20"
+                                title="Đóng quảng cáo"
+                            >
+                                <FiX size={16} />
+                            </button>
+                        </div>
+                    )}
+
                 </div>
 
             </div>
