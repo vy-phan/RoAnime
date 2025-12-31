@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import movieApi from '../api/movieApi';
 import Loading from '../components/common/Loading';
+import ProtectedImage from '../components/common/ProtectedImage';
 import { getPosterUrl } from '../utils/image';
 import { getYoutubeId } from '../utils/video';
 import {
@@ -14,7 +15,8 @@ import {
     FiCheck,
     FiShare2,
     FiArrowUp,
-    FiArrowDown
+    FiArrowDown,
+    FiX
 } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
 import { addToHistory, getMovieHistory } from '../utils/history';
@@ -33,6 +35,10 @@ const MovieDetail: React.FC = () => {
     const [lastWatchedEpisode, setLastWatchedEpisode] = useState<any>(null);
 
     const [currentServerIndex, setCurrentServerIndex] = useState<number>(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImageAlt, setSelectedImageAlt] = useState<string>('');
+    const [showBanner, setShowBanner] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchMovieDetail = async () => {
@@ -97,6 +103,31 @@ const MovieDetail: React.FC = () => {
         setTimeout(() => setIsCopied(false), 2000);
     };
 
+    const handleImageDoubleClick = (imageUrl: string, alt: string) => {
+        setSelectedImage(imageUrl);
+        setSelectedImageAlt(alt);
+        setIsModalOpen(true);
+        document.body.style.overflow = 'hidden'; // Ngăn scroll khi modal mở
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedImage(null);
+        setSelectedImageAlt('');
+        document.body.style.overflow = 'unset'; // Khôi phục scroll
+    };
+
+    // Đóng modal khi nhấn ESC
+    useEffect(() => {
+        const handleEsc = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isModalOpen) {
+                handleCloseModal();
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [isModalOpen]);
+
 
 
     if (loading) return <Loading message="Đang tải thông tin phim..." className="h-screen" />;
@@ -117,7 +148,7 @@ const MovieDetail: React.FC = () => {
             {/* 1. HERO BACKDROP */}
             <div className="relative w-full h-[40vh] md:h-[50vh] lg:h-[60vh]">
                 <div className="absolute inset-0 overflow-hidden">
-                    <img
+                    <ProtectedImage
                         src={getPosterUrl(movie.thumb_url)}
                         alt={movie.name}
                         className="w-full h-full object-cover"
@@ -134,7 +165,7 @@ const MovieDetail: React.FC = () => {
                 <div className="flex flex-col md:flex-row gap-8 items-end mb-10">
                     <div className="flex-shrink-0 w-40 md:w-56 lg:w-64 shadow-2xl rounded-xl overflow-hidden border-4 border-white bg-white mx-auto md:mx-0">
                         <div className="relative aspect-[2/3]">
-                            <img src={getPosterUrl(movie.poster_url)} alt={movie.name} className="w-full h-full object-cover" />
+                            <ProtectedImage src={getPosterUrl(movie.poster_url)} alt={movie.name} className="w-full h-full object-cover" />
                         </div>
                     </div>
 
@@ -351,8 +382,6 @@ const MovieDetail: React.FC = () => {
 
                             {/* Tab Content */}
                             <div className="p-6 min-h-[400px]">
-
-                                {/* 1. EPISODES */}
                                 {/* 1. EPISODES */}
                                 {activeTab === 'episodes' && (
                                     <div className="animate-in fade-in zoom-in-95 duration-300">
@@ -489,21 +518,62 @@ const MovieDetail: React.FC = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <span className="text-xs font-bold text-slate-400 uppercase">Ảnh Bìa</span>
-                                            <div className="rounded-xl overflow-hidden shadow-md border border-slate-100 group">
-                                                <img src={getPosterUrl(movie.thumb_url)} alt="Thumb" className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <div 
+                                                className="rounded-xl overflow-hidden shadow-md border border-slate-100 group cursor-pointer"
+                                                onClick={() => handleImageDoubleClick(getPosterUrl(movie.thumb_url), 'Ảnh Bìa')}
+                                            >
+                                                <ProtectedImage 
+                                                    src={getPosterUrl(movie.thumb_url)} 
+                                                    alt="Thumb" 
+                                                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                />
                                             </div>
+                                            <p className="text-xs text-slate-400 text-center italic">Click để xem chi tiết</p>
                                         </div>
                                         <div className="space-y-2">
                                             <span className="text-xs font-bold text-slate-400 uppercase">Ảnh Poster</span>
-                                            <div className="rounded-xl overflow-hidden shadow-md border border-slate-100 w-1/2 mx-auto group">
-                                                <img src={getPosterUrl(movie.poster_url)} alt="Poster" className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <div 
+                                                className="rounded-xl overflow-hidden shadow-md border border-slate-100 w-1/2 mx-auto group cursor-pointer"
+                                                onClick={() => handleImageDoubleClick(getPosterUrl(movie.poster_url), 'Ảnh Poster')}
+                                            >
+                                                <ProtectedImage 
+                                                    src={getPosterUrl(movie.poster_url)} 
+                                                    alt="Poster" 
+                                                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                />
                                             </div>
+                                            <p className="text-xs text-slate-400 text-center italic">Click để xem chi tiết</p>
                                         </div>
                                     </div>
                                 )}
 
                             </div>
                         </div>
+
+                        {/* BANNER QUẢNG CÁO */}
+                        {showBanner && (
+                            <div className="mt-6 relative bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {/* Nút đóng */}
+                                <button
+                                    onClick={() => setShowBanner(false)}
+                                    className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
+                                    aria-label="Đóng banner"
+                                >
+                                    <FiX className="text-lg" />
+                                </button>
+
+                                {/* Banner Image */}
+                                <div className="relative w-full">
+                                    <ProtectedImage
+                                        src="/kaori.gif"
+                                        alt="Banner quảng cáo"
+                                        className="w-full h-auto object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        
                     </div>
 
                 </div>
@@ -531,6 +601,45 @@ const MovieDetail: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* IMAGE MODAL */}
+            {isModalOpen && selectedImage && (
+                <div 
+                    className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    onClick={handleCloseModal}
+                >
+                    <div 
+                        className="relative max-w-7xl max-h-[95vh] w-full h-full flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close Button */}
+                        <button
+                            onClick={handleCloseModal}
+                            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md transition-all hover:scale-110 active:scale-95 shadow-lg border border-white/20"
+                            aria-label="Đóng"
+                        >
+                            <FiX className="text-2xl" />
+                        </button>
+
+                        {/* Image */}
+                        <ProtectedImage 
+                            src={selectedImage} 
+                            alt={selectedImageAlt}
+                            className="max-w-full max-h-[95vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
+                        />
+
+                        {/* Image Label */}
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-lg text-sm font-semibold border border-white/20">
+                            {selectedImageAlt}
+                        </div>
+                    </div>
+
+                    {/* Hint Text */}
+                    <p className="absolute bottom-4 right-4 text-white/60 text-xs">
+                        Nhấn ESC hoặc click bên ngoài để đóng
+                    </p>
+                </div>
+            )}
 
         </div>
     );

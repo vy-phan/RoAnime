@@ -17,7 +17,7 @@ import HistoryPage from "./pages/HistoryPage";
 function App() {
 
   return (
-    <div className="flex flex-col min-h-screen font-sans">
+    <div className="flex flex-col min-h-screen font-sans ">
       <BrowserRouter>
         <Navbar />
         <main className="flex-grow pt-20 px-4 container mx-auto">

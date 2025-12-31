@@ -7,6 +7,7 @@ import {
     FiCalendar, FiEyeOff, FiFilm, FiX 
 } from 'react-icons/fi';
 import { decodeHTMLEntities } from '../utils/textFomat';
+import ProtectedImage from '../components/common/ProtectedImage';
 
 const HistoryPage: React.FC = () => {
     const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
@@ -42,8 +43,8 @@ const HistoryPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800  font-sans">
-            <div className="container mx-auto px-2 md:px-4 pt-20 md:pt-28">
+        <div className="min-h-screen bg-slate-50 text-slate-800 pb-10 pt-6">
+            <div className="mx-auto px-2 ">
                 
                 {/* HEADER */}
                 <div className="flex flex-row items-center justify-between gap-4 mb-6 px-2">
@@ -77,7 +78,7 @@ const HistoryPage: React.FC = () => {
                             >
                                 {/* 1. IMAGE AREA */}
                                 <Link to={`/phim/${item.movieSlug}`} className="relative aspect-video overflow-hidden block bg-slate-200">
-                                    <img 
+                                    <ProtectedImage 
                                         src={getPosterUrl(item.thumbUrl)} 
                                         alt={item.movieName}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

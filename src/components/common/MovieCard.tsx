@@ -4,6 +4,7 @@ import { FiPlay, FiInfo, FiClock, FiStar } from 'react-icons/fi';
 import { getPosterUrl } from '../../utils/image';
 import { formatTime } from '../../utils/timeFomat';
 import { decodeHTMLEntities } from '../../utils/textFomat';
+import ProtectedImage from './ProtectedImage';
 
 interface MovieCardProps {
     movie: MovieItem;
@@ -13,6 +14,21 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     const rating = movie.tmdb?.vote_average || 0;
     const displayRating = rating > 0 ? rating.toFixed(1) : 'N/A';
 
+    // Xác định URL xem ngay dựa trên loại phim
+    // Phim chiếu rạp/phim lẻ: /phim/{slug}/full?sv=0
+    // Phim bộ: /phim/{slug}/tap-1?sv=0
+    const getWatchUrl = (): string => {
+        const episodeCurrent = movie.episode_current?.toLowerCase() || '';
+        // Nếu episode_current chứa "full"  → phim lẻ/chiếu rạp
+        if (episodeCurrent.includes('full')) {
+            return `/phim/${movie.slug}/full?sv=0`;
+        }
+        // Ngược lại → phim bộ (tập đầu tiên)
+        return `/phim/${movie.slug}/tap-1?sv=0`;
+    };
+
+    const watchUrl = getWatchUrl();
+
     return (
         <div className="group relative w-full h-full">
             <Link
@@ -20,7 +36,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
                 className="flex flex-col h-full gap-3 cursor-pointer transition-all duration-300 active:scale-[0.98]"
             >
                 <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden bg-slate-200 shadow-lg shadow-sky-500/10 group-hover:shadow-sky-500/30 transition-shadow duration-500">
-                    <img
+                    <ProtectedImage
                         src={getPosterUrl(movie.poster_url)}
                         alt={movie.name}
                         loading="lazy"
@@ -55,7 +71,6 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             </Link>
 
             {/* HOVER CARD (POPUP - PC ONLY) */}
-            {/* HOVER CARD (POPUP - PC ONLY) */}
             <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 invisible opacity-0 scale-95 group-hover:visible group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 ease-out delay-200">
 
                 {/* Container */}
@@ -63,7 +78,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
 
                     {/* A. Ảnh Thumb - Không có overlay che */}
                     <Link to={`/phim/${movie.slug}`} className="block relative aspect-video w-full overflow-hidden group/image">
-                        <img
+                        <ProtectedImage
                             src={getPosterUrl(movie.thumb_url)}
                             alt={movie.name}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover/image:scale-105"
@@ -122,7 +137,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
                         {/* Action buttons */}
                         <div className="flex items-center gap-2.5">
                             <Link
-                                to={`/phim/${movie.slug}`}
+                                to={watchUrl}
                                 className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-500 hover:via-orange-500 hover:to-orange-600 text-white text-sm font-black py-3 rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-95"
                             >
                                 <FiPlay className="fill-current text-base" />

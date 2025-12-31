@@ -133,7 +133,7 @@ const Footer: React.FC = () => {
           <p className="flex items-center gap-1.5 text-slate-500 text-sm font-medium">
             Made with <FiHeart className="text-red-500 fill-current animate-pulse" /> by
             <span className="text-slate-800 font-bold hover:text-amber-500 cursor-pointer transition-colors">
-              Arya Kujou
+              Vy Phan Rekid
             </span>
           </p>
         </div>

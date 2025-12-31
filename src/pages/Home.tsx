@@ -8,6 +8,7 @@ import HeroBanner from '../components/home/HeroBanner';
 import TopTrendingSection from '../components/home/TopTrendingSection';
 import GenreTags from '../components/home/GenreTags';
 import Pagination from '../components/common/Pagination';
+import ProtectedImage from '../components/common/ProtectedImage';
 
 // Hàm tạo Cache Key cho Home Grid
 const getCacheKey = (page: number) => `home_anime_japan_page_${page}`;
@@ -256,7 +257,7 @@ const Home: React.FC = () => {
                     {showBanner && (
                         <div className="w-[85%] mx-auto aspect-square relative rounded-3xl overflow-hidden shadow-xl shadow-slate-200 border border-slate-100 group cursor-pointer transition-all duration-300 hover:shadow-2xl z-10 bg-white animate-fade-in">
 
-                            <img
+                            <ProtectedImage
                                 src="/chitoge.gif"
                                 alt="Promotion Banner"
                                 className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"

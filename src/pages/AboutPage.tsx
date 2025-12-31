@@ -101,7 +101,7 @@ const AboutPage: React.FC = () => {
                             Mọi đóng góp và sự ủng hộ của các bạn là động lực rất lớn.
                         </p>
                         <div className="text-sm font-medium text-slate-400">
-                            © {new Date().getFullYear()} Developed with ❤️ by Arya Kujou
+                            © {new Date().getFullYear()} Developed with ❤️ by Vy Phan Rekid
                         </div>
                     </div>
                 </div>

@@ -8,7 +8,7 @@
 
 **Rổ Anime** là một dự án **Frontend thuần túy (Pure Frontend)** được xây dựng nhằm mục đích nghiên cứu và thực hành các công nghệ web hiện đại. Website tập trung tối ưu hóa giao diện người dùng (UI/UX), khả năng tương thích trên mọi thiết bị (Mobile-First) và tốc độ tải trang nhanh chóng.
 
-Dự án này là sản phẩm tâm huyết của **Arya Kujou**, dành cho cộng đồng yêu thích Anime.
+Dự án này là sản phẩm tâm huyết của **Vy Phan Rekid**, dành cho cộng đồng yêu thích Anime.
 
 ## ✨ Tính Năng Nổi Bật
 
@@ -86,7 +86,7 @@ src/
 
 ## 👤 Tác Giả
 
-Developed with ❤️ by **Arya Kujou**
+Developed with ❤️ by **Vy Phan Rekid**
 
 ---
 *Lưu ý: Dự án này được xây dựng với mục đích phi lợi nhuận và học tập.*

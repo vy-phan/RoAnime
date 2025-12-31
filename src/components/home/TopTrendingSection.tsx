@@ -4,6 +4,7 @@ import { FiPlay, FiInfo, FiClock, FiStar } from 'react-icons/fi';
 import { getPosterUrl } from '../../utils/image';
 import { formatTime } from '../../utils/timeFomat';
 import { decodeHTMLEntities } from '../../utils/textFomat';
+import ProtectedImage from '../common/ProtectedImage';
 
 interface MovieCardProps {
     movie: MovieItem;
@@ -14,6 +15,21 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
     const rating = movie.tmdb?.vote_average || 0;
     const displayRating = rating > 0 ? rating.toFixed(1) : 'N/A';
     const rank = index + 1;
+
+    // Xác định URL xem ngay dựa trên loại phim
+    // Phim chiếu rạp/phim lẻ: /phim/{slug}/full?sv=0
+    // Phim bộ: /phim/{slug}/tap-1?sv=0
+    const getWatchUrl = (): string => {
+        const episodeCurrent = movie.episode_current?.toLowerCase() || '';
+        // Nếu episode_current chứa "full" → phim lẻ/chiếu rạp
+        if (episodeCurrent.includes('full')) {
+            return `/phim/${movie.slug}/full?sv=0`;
+        }
+        // Ngược lại → phim bộ (tập đầu tiên)
+        return `/phim/${movie.slug}/tap-1?sv=0`;
+    };
+
+    const watchUrl = getWatchUrl();
 
     const getRankColor = (r: number) => {
         if (r === 1) return 'text-[#FFD700]';
@@ -36,7 +52,7 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
                 <div className="relative aspect-[2/3] w-full" style={{
                     clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%)'
                 }}>
-                    <img
+                    <ProtectedImage
                         src={getPosterUrl(movie.poster_url)}
                         alt={movie.name}
                         loading="lazy"
@@ -85,7 +101,11 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
             <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 invisible opacity-0 scale-95 group-hover:visible group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 ease-out delay-200 pointer-events-none group-hover:pointer-events-auto">
                 <div className="w-[320px] bg-white rounded-2xl shadow-2xl overflow-hidden ring-1 ring-slate-900/5 text-slate-800">
                     <Link to={`/phim/${movie.slug}`} className="block relative aspect-video w-full overflow-hidden">
-                        <img src={getPosterUrl(movie.thumb_url)} alt={movie.name} className="h-full w-full object-cover" />
+                        <ProtectedImage
+                            src={getPosterUrl(movie.thumb_url)}
+                            alt={movie.name}
+                            className="h-full w-full object-cover"
+                        />
                         <div className="absolute top-2 right-2">
                             <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">
                                 {movie.episode_current || 'Full'}
@@ -108,7 +128,7 @@ const TrendingCard: React.FC<MovieCardProps> = ({ movie, index }) => {
                         </div>
 
                         <div className="flex gap-2">
-                            <Link to={`/phim/${movie.slug}`} className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
+                            <Link to={watchUrl} className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
                                 <FiPlay className="fill-current text-sm" /> XEM NGAY
                             </Link>
                             <Link to={`/phim/${movie.slug}`} className="p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-sky-500 transition-colors">
