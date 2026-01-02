@@ -445,9 +445,14 @@ const WatchPage: React.FC = () => {
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                 />
                                             </div>
-                                            <p className="mt-2 text-[11px] sm:text-xs text-center text-gray-600 font-bold leading-tight group-hover:text-amber-600 transition-colors line-clamp-2">
+                                            <a
+                                                href={`https://www.google.com/search?q=${encodeURIComponent(actorName)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-2 text-[11px] sm:text-xs text-center text-gray-600 font-bold leading-tight group-hover:text-amber-600 transition-colors line-clamp-2 hover:underline"
+                                            >
                                                 {actorName}
-                                            </p>
+                                            </a>
                                         </div>
                                     ))}
                                 </div>
@@ -455,9 +460,7 @@ const WatchPage: React.FC = () => {
                                 <p className="text-xs text-gray-400 text-center italic">Đang cập nhật diễn viên...</p>
                             )}
 
-                            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-                                <button className="text-xs text-gray-400 hover:text-amber-600 font-medium transition-colors">Xem tất cả</button>
-                            </div>
+                            
                         </div>
                     </div>
 

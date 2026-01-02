@@ -355,7 +355,22 @@ const MovieDetail: React.FC = () => {
                                             <FiUser /> Diễn viên Lồng Tiếng
                                         </span>
                                         <span className="text-slate-800 font-medium text-sm leading-relaxed block">
-                                            {movie.actor?.join(', ') || 'Đang cập nhật'}
+                                            {movie.actor && movie.actor.length > 0
+                                                ? movie.actor.map((name, idx) => (
+                                                    <React.Fragment key={name}>
+                                                        <a
+                                                            href={`https://www.google.com/search?q=${encodeURIComponent(name)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="hover:underline hover:text-yellow-500 transition-colors"
+                                                        >
+                                                            {name}
+                                                        </a>
+                                                        {idx !== movie.actor.length - 1 && ', '}
+                                                    </React.Fragment>
+                                                ))
+                                                : 'Đang cập nhật'
+                                            }
                                         </span>
                                     </div>
                                 </div>

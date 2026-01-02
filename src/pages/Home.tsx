@@ -95,7 +95,7 @@ const Home: React.FC = () => {
             try {
                 const currentYear = new Date().getFullYear();
                 // Lấy 60 phim của năm nay để sort
-                const response = await movieApi.getRankingList(currentYear, 60);
+                const response = await movieApi.getRankingList(currentYear, 6);
                 let list = response.data.items;
 
                 // SORTING CLIENT SIDE: Sắp xếp theo Rating TMDB cao -> thấp

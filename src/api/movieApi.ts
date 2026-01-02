@@ -28,13 +28,11 @@ const movieApi = {
     },
 
     getTrendingAnimeMovies: (pageNumber: number, limit:number): Promise<MovieListResponse> => {
-        const currentYear = new Date().getFullYear();
 
         return apiClient.get('/v1/api/danh-sach/phim-chieu-rap', {
             params: {
                 country: 'nhat-ban',
                 page: pageNumber,
-                year: currentYear,
                 sort_field: 'modified.time',
                 sort_type: 'desc',
                 limit: limit
