@@ -13,6 +13,7 @@ import SearchPage from "./pages/SearchPage";
 import Footer from "./components/common/Footer";
 import TheatricalPage from "./pages/TheatricalPage";
 import HistoryPage from "./pages/HistoryPage";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
         <Footer />
         <ScrollToTop />
       </BrowserRouter>
+      <SpeedInsights />
     </div>
   )
 }
